@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Obuw6.Modeli;
+using System.Data.Entity;
 
 namespace Obuw6
 {
@@ -20,9 +22,34 @@ namespace Obuw6
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        private Polzovatel _tekuchiyPolzovatel;
+        public MainWindow(Polzovatel polzovatel)
         {
             InitializeComponent();
+            _tekuchiyPolzovatel = polzovatel;
+            txtPolzovatel.Text = _tekuchiyPolzovatel == null ? "Вы вошли как Гость" : $"{_tekuchiyPolzovatel.Fio} ({_tekuchiyPolzovatel.Rol.Nazvanie})";
+
+            Zagruzka();
+        }
+        private void Zagruzka()
+        {
+
+            using (var db = new ObuwKontext())
+            {
+                LvElement.ItemsSource = db.Tovari
+                    .Include(t => t.Postavchik)
+                    .Include(t => t.Proizvoditel)
+                    .Include(t => t.Kategoriya)
+                    .Include(t => t.EdinicaIzmereniya)
+                    .ToList();
+
+            }
+        }
+
+        private void Vihod(object sender, RoutedEventArgs e)
+        {
+            new Login().Show();
+            this.Close();
         }
     }
 }
